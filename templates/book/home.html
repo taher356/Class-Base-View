@@ -1,0 +1,4 @@
+
+{% for book in books %}
+    <a href="{% url 'books:book-detail' slug=book.slug %}">{{ book.title }}</a>
+{% endfor %}

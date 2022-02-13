@@ -3,7 +3,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.utils import timezone
-from django.views.generic import TemplateView, ListView, FormView, CreateView
+from django.views.generic import TemplateView, ListView, FormView, CreateView, UpdateView
 from django.views.generic.detail import DetailView
 
 from books.forms import AddForm
@@ -20,6 +20,13 @@ from books.models import Book
 
 
 class AddBookView(CreateView):
+    model = Book
+    template_name = "book/add.html"
+    form_class = AddForm
+    success_url = '/books/'
+
+
+class BookEditView(UpdateView):
     model = Book
     template_name = "book/add.html"
     form_class = AddForm

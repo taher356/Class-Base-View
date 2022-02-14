@@ -1,10 +1,13 @@
+from django.contrib.auth.views import redirect_to_login
 from django.db.models import F
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.utils import timezone
 from django.views.generic import TemplateView, ListView, FormView, CreateView, UpdateView
 from django.views.generic.detail import DetailView
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 from books.forms import AddForm
 from books.models import Book
@@ -26,7 +29,23 @@ class AddBookView(CreateView):
     success_url = '/books/'
 
 
-class BookEditView(UpdateView):
+class UserAccessMixin(PermissionRequiredMixin):
+    # if we dont have permissions, with this we able to redirect to /book
+    def dispatch(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        if not self.has_permission():
+            return redirect('/books')
+        return super(UserAccessMixin, self).dispatch(request, *args, **kwargs)
+
+
+class BookEditView(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = 'books.change_books'
+    permission_denied_message = ""
+    login_url = '/books/'
+    redirect_field_name = 'next'
+
     model = Book
     template_name = "book/add.html"
     form_class = AddForm
